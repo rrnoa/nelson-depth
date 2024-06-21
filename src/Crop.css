@@ -13,7 +13,7 @@ html, body, #root {
 .new-screen-container {
   display: flex;
   flex-direction: column;
-  width: 700px;
+  width: 100%;
   height: 80vh;
   justify-content: space-between;
   align-items: center;
@@ -31,7 +31,6 @@ html, body, #root {
 
 .bottom-section {
   position: absolute;
-  width: 100%;
   padding: 10px;
   display: flex;
   justify-content: center;
@@ -39,7 +38,7 @@ html, body, #root {
   gap: 20px;
   background-color: #f0f0f0;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  bottom: 10px;
+  bottom: 20px;
 }
 
 .input-group {

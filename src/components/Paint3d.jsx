@@ -11,7 +11,7 @@ export const Paint3d = ({ sceneRef, renderRef, heights, allColors, xBlocks, yBlo
     const [applyInch, setApplyInch] = useState(true);
     const [showGreen, setShowGreen] = useState(false);
     const [cutHeight, setCutHeight] = useState(0.65);
-    const [delta, setDelta] = useState(0.5);
+    const [delta, setDelta] = useState(0.25);
     const canvasRef = useRef(null);
     const guiRef = useRef(null);
 
@@ -36,14 +36,10 @@ export const Paint3d = ({ sceneRef, renderRef, heights, allColors, xBlocks, yBlo
         const camera = configCamera(width, height);
         const directionalLight = configLights();
         const controls = configControls(camera, renderRef);
-        const ambientlight = new THREE.AmbientLight(0xffffff, 1);
-        let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-        const helper = new THREE.DirectionalLightHelper(directionalLight, 5);
-
+        const ambientlight = new THREE.AmbientLight(0xffffff, 1);        
         sceneRef.background = new THREE.Color( 0xFBFBFC );
 
-        sceneRef.add(helper);
-        sceneRef.add(shadowHelper);
+        
         sceneRef.add(ambientlight);
         sceneRef.add(directionalLight);
 
@@ -183,10 +179,8 @@ scene.add(instancedMesh);
         const refMesh = new THREE.Mesh(refgeometry, refMaterial);
         refMesh.translateZ(0.254/2);
         scene.add(refMesh);
-    }
-    
-    const axesHelper = new THREE.AxesHelper( 1 );
-    //scene.add( axesHelper );
+    }  
+
    
 };
 

@@ -2,18 +2,16 @@ import React, { useRef, useState } from 'react';
 import * as THREE from 'three';
 import { FaUpload, FaCheck } from 'react-icons/fa';
 import pixelateImg from "./lib/pixelate";
-import { useLocation } from 'react-router-dom';
 import { pixelate16 } from './lib/pixel16';
 import './App.css';
 import { Paint3d } from './components/Paint3d';
 import Crop from './Crop';
 import ImageSidebar from './components/ImageSidebar';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
 const App = () => {
-  const location = useLocation();
-  const { width, height, blockSize, croppedImg } = location.state || { width: 0, height: 0, blockSize: 1, croppedImg: null};
+  const [show, setShow] = useState("crop");
+  const blockSize = 1;
   const sceneRef = useRef(new THREE.Scene());
   const renderRef = useRef(new THREE.WebGLRenderer({ antialias: true }));
   const [pxImg, setPxImg] = useState(null)
@@ -37,10 +35,10 @@ const App = () => {
     console.log("handleSelectImage",depthMap);
     setSelectedImage(image);
     setSelectedDepthMap(depthMap);
+    setShow("crop");
   };
 
-  const handleMapUpload = async () => {
-    console.log("handleMapUpload",selectedDepthMap);
+  const handleMapUpload = async () => {    
     try {
       // Fetch the depth map image from the URL
       const response = await fetch(selectedDepthMap);
@@ -51,12 +49,16 @@ const App = () => {
       pixelate16(arrayBuffer, pxImg, blockSize, xBlocks, yBlocks, startX, startY, (dataUrl, alturas) => {
         setPixelDepthUrl(dataUrl);
         setHeights(alturas);
+        console.log("handleMapUpload",selectedDepthMap);    
+        console.log(alturas);
       });
   
       // Convert blob to a data URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setResultImageUrl(reader.result);
+        setShow("3d");
+
       };
       reader.readAsDataURL(blob);
   
@@ -68,7 +70,8 @@ const App = () => {
 
   return (
     <div className="app-container">
-      <div className="sidebar">
+      
+{/*       <div className="sidebar">
         
         <div className="image-section">
           {pxImg && <img src={pxImg} alt="Pixelada" className="rightbar-image" />}
@@ -81,14 +84,13 @@ const App = () => {
         <button className="process-button" onClick={handleMapUpload}>
           <FaCheck /> Generar 3d
         </button>
-      </div>
+      </div> */}
       <div className="canvas-container">
-        <Tabs>
-          <TabList>
-            <Tab>Crop</Tab>
-            <Tab>Paint3D</Tab>
-          </TabList>
-          <TabPanel>
+        {show === 'crop' && selectedImage && <button className="process-button" onClick={handleMapUpload}>
+          <FaCheck /> Generar 3d
+        </button>}
+          <div style={{width: '100%'}}>
+            {show === "crop"? (
             <Crop 
             selectedImage={selectedImage} 
             onPixelComplete={setPxImg}
@@ -97,9 +99,8 @@ const App = () => {
             setStartY={setStartY}
             setXBlokcs = {setXBlokcs}
             setYBlokcs = {setYBlokcs}
-            />
-          </TabPanel>
-          <TabPanel>
+            />):
+            (
             <Paint3d 
               sceneRef={sceneRef.current}
               renderRef={renderRef.current}
@@ -109,8 +110,8 @@ const App = () => {
               yBlocks={yBlocks}
               blockSizeInInches={blockSize}
             />
-          </TabPanel>
-        </Tabs>
+            )}            
+          </div>         
       </div>
       <div className="rightbar">
         <ImageSidebar onSelectImage={handleSelectImage}/>

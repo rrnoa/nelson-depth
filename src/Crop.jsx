@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './Crop.css';
 import getCroppedImg from './lib/cropImage';
 import pixelateImg from "./lib/pixelate";
+import { FaCheck } from 'react-icons/fa';
 
 
 const Crop = ({ selectedImage, onPixelComplete, setAllColors, setStartX, setStartY, setXBlokcs, setYBlokcs }) => {
@@ -43,6 +44,7 @@ const Crop = ({ selectedImage, onPixelComplete, setAllColors, setStartX, setStar
 
 
   const onCropComplete = async (croppedArea, croppedAreaPixels) => {
+    console.log("crop completado")
     setCroppedAreaPixels(croppedAreaPixels);
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
@@ -62,6 +64,32 @@ const Crop = ({ selectedImage, onPixelComplete, setAllColors, setStartX, setStar
     }
   };
 
+  const handleMapUpload = async () => {
+    console.log("handleMapUpload",selectedDepthMap);
+    try {
+      // Fetch the depth map image from the URL
+      const response = await fetch(selectedDepthMap);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      //console.log(arrayBuffer, pxImg, blockSize, xBlocks, yBlocks, startX, startY);
+      // Process the depth map image
+      pixelate16(arrayBuffer, pxImg, blockSize, xBlocks, yBlocks, startX, startY, (dataUrl, alturas) => {
+        setPixelDepthUrl(dataUrl);
+        setHeights(alturas);
+      });
+  
+      // Convert blob to a data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setResultImageUrl(reader.result);
+      };
+      reader.readAsDataURL(blob);
+  
+    } catch (error) {
+      console.error('Error loading depth map image:', error);
+    }
+  };
+
    return (
     <div className="new-screen-container">
       <div className="main-area">
@@ -74,6 +102,7 @@ const Crop = ({ selectedImage, onPixelComplete, setAllColors, setStartX, setStar
           onCropChange={setCrop}
           onCropComplete={onCropComplete}
           onZoomChange={setZoom}
+          zoomSpeed={0.2}
         />
         )}
       </div>
@@ -87,22 +116,12 @@ const Crop = ({ selectedImage, onPixelComplete, setAllColors, setStartX, setStar
           />
         </div>
         <div className="input-group">
-          <label htmlFor="height">Largo:</label>
+          <label htmlFor="height">Alto:</label>
           <input
             type="number"            
             value={height}
             onChange={(e) => setHeight(e.target.value)}
           />
-        </div>
-        <div className="input-group">
-          <label htmlFor="height">Ancho del bloque</label>
-          <select
-            value={blockSize}
-            onChange={(e) => setBlockSize(Number(e.target.value))}
-          >
-            <option value={1}>1</option>
-            <option value={0.5}>0.5</option>
-          </select>
         </div>        
       </div>
     </div>
